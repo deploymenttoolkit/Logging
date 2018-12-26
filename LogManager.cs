@@ -12,7 +12,7 @@ namespace DeploymentToolkit.Logging
 
         private static LoggingConfiguration _configuration;
 
-        public static void Initialize()
+        public static void Initialize(string loggerName)
         {
             if (!Directory.Exists(_logDirectory))
                 Directory.CreateDirectory(_logDirectory);
@@ -40,7 +40,12 @@ namespace DeploymentToolkit.Logging
                     if (fileTarget == null)
                         continue;
 
-                    fileTarget.FileName = Path.Combine(_logDirectory, fileTarget.FileName.ToString().Trim('\''));
+                    fileTarget.FileName = Path.Combine(_logDirectory,
+                        fileTarget.FileName
+                            .ToString()
+                            .Trim('\'')
+                            .Replace("DeploymentToolkit-", $"DeploymentToolkit-{loggerName}-")
+                    );
                 }
             }
 
