@@ -44,9 +44,7 @@ namespace DeploymentToolkit.Logging
             {
                 if(target is AsyncTargetWrapper)
                 {
-                    var fileTarget = ((AsyncTargetWrapper)target).WrappedTarget as FileTarget;
-
-                    if (fileTarget == null)
+                    if (!(((AsyncTargetWrapper)target).WrappedTarget is FileTarget fileTarget))
                         continue;
 
                     fileTarget.FileName = Path.Combine(LogDirectory,
