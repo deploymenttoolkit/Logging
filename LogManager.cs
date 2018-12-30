@@ -8,14 +8,23 @@ namespace DeploymentToolkit.Logging
 {
     public static class LogManager
     {
-        private static string _logDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
+        private static string _logDirectory;
+        public static string LogDirectory
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_logDirectory))
+                    _logDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
+                return _logDirectory;
+            }
+        }
 
         private static LoggingConfiguration _configuration;
 
         public static void Initialize(string loggerName)
         {
-            if (!Directory.Exists(_logDirectory))
-                Directory.CreateDirectory(_logDirectory);
+            if (!Directory.Exists(LogDirectory))
+                Directory.CreateDirectory(LogDirectory);
 
             if(!File.Exists("log.config"))
             {
@@ -40,7 +49,7 @@ namespace DeploymentToolkit.Logging
                     if (fileTarget == null)
                         continue;
 
-                    fileTarget.FileName = Path.Combine(_logDirectory,
+                    fileTarget.FileName = Path.Combine(LogDirectory,
                         fileTarget.FileName
                             .ToString()
                             .Trim('\'')
