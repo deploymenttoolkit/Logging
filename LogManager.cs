@@ -23,6 +23,9 @@ namespace DeploymentToolkit.Logging
         private static string GetLogDirectory()
         {
             var currentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
+            if (!Directory.Exists(currentDirectory))
+                Directory.CreateDirectory(currentDirectory);
+
             if (IsDirectoryWriteable(currentDirectory))
                 return currentDirectory;
 
@@ -76,9 +79,6 @@ namespace DeploymentToolkit.Logging
 
         public static void Initialize(string loggerName)
         {
-            if (!Directory.Exists(LogDirectory))
-                Directory.CreateDirectory(LogDirectory);
-
             if(!File.Exists("log.config"))
             {
                 //Create logging rules if not existing
