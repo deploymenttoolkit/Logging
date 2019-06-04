@@ -1,6 +1,7 @@
 ﻿using NLog.Config;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
+using System;
 using System.IO;
 using System.Reflection;
 
@@ -14,8 +15,60 @@ namespace DeploymentToolkit.Logging
             get
             {
                 if (string.IsNullOrEmpty(_logDirectory))
-                    _logDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
+                    _logDirectory = GetLogDirectory();
                 return _logDirectory;
+            }
+        }
+
+        private static string GetLogDirectory()
+        {
+            var currentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
+            if (IsDirectoryWriteable(currentDirectory))
+                return currentDirectory;
+
+            var programData = Environment.GetEnvironmentVariable("PROGRAMDATA", EnvironmentVariableTarget.Machine);
+            if(!string.IsNullOrEmpty(programData))
+            {
+                try
+                {
+                    var deploymentToolkitPath = Path.Combine(programData, "DeploymentToolkit");
+                    if (!Directory.Exists(deploymentToolkitPath))
+                        Directory.CreateDirectory(deploymentToolkitPath);
+
+                    var logPath = Path.Combine(deploymentToolkitPath, "Logs");
+                    if (!Directory.Exists(logPath))
+                        Directory.CreateDirectory(logPath);
+
+                    if (IsDirectoryWriteable(logPath))
+                        return logPath;
+                }
+                catch (Exception) { }
+            }
+
+            var tempDirectory = Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.User);
+            if(!string.IsNullOrEmpty(tempDirectory))
+            {
+                if (IsDirectoryWriteable(tempDirectory))
+                    return tempDirectory;
+            }
+
+            throw new Exception("Failed to get a valid Log directory");
+        }
+
+        private static bool IsDirectoryWriteable(string path)
+        {
+            try
+            {
+                using (var fileStream = File.Create(Path.Combine(path, Path.GetRandomFileName()), 1, FileOptions.DeleteOnClose))
+                {
+                    // Do nothing
+                }
+
+                return true;
+            }
+            catch(UnauthorizedAccessException)
+            {
+                return false;
             }
         }
 
