@@ -22,12 +22,16 @@ namespace DeploymentToolkit.Logging
 
         private static string GetLogDirectory()
         {
-            var currentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
-            if (!Directory.Exists(currentDirectory))
-                Directory.CreateDirectory(currentDirectory);
+            try
+            {
+                var currentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
+                if (!Directory.Exists(currentDirectory))
+                    Directory.CreateDirectory(currentDirectory);
 
-            if (IsDirectoryWriteable(currentDirectory))
-                return currentDirectory;
+                if (IsDirectoryWriteable(currentDirectory))
+                    return currentDirectory;
+            }
+            catch (Exception) { }
 
             var programData = Environment.GetEnvironmentVariable("PROGRAMDATA", EnvironmentVariableTarget.Machine);
             if(!string.IsNullOrEmpty(programData))
