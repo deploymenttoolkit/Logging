@@ -9,6 +9,16 @@ namespace DeploymentToolkit.Logging
 {
     public static class LogManager
     {
+        public static string LoggerName { get; private set; }
+
+        private static string _logFileName
+        {
+            get
+            {
+                return $"log.{LoggerName}.config";
+            }
+        }
+
         private static string _logDirectory;
         public static string LogDirectory
         {
@@ -34,7 +44,7 @@ namespace DeploymentToolkit.Logging
             catch (Exception) { }
 
             var programData = Environment.GetEnvironmentVariable("PROGRAMDATA", EnvironmentVariableTarget.Machine);
-            if(!string.IsNullOrEmpty(programData))
+            if (!string.IsNullOrEmpty(programData))
             {
                 try
                 {
@@ -53,7 +63,7 @@ namespace DeploymentToolkit.Logging
             }
 
             var tempDirectory = Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.User);
-            if(!string.IsNullOrEmpty(tempDirectory))
+            if (!string.IsNullOrEmpty(tempDirectory))
             {
                 if (IsDirectoryWriteable(tempDirectory))
                     return tempDirectory;
@@ -73,7 +83,7 @@ namespace DeploymentToolkit.Logging
 
                 return true;
             }
-            catch(UnauthorizedAccessException)
+            catch (UnauthorizedAccessException)
             {
                 return false;
             }
@@ -83,7 +93,9 @@ namespace DeploymentToolkit.Logging
 
         public static void Initialize(string loggerName)
         {
-            if(!File.Exists("log.config"))
+            LoggerName = loggerName;
+
+            if (!File.Exists(_logFileName))
             {
                 //Create logging rules if not existing
 
@@ -91,15 +103,15 @@ namespace DeploymentToolkit.Logging
                 var resource = assembly.GetManifestResourceStream("DeploymentToolkit.Logging.log.config");
                 using (var file = new StreamReader(resource))
                 {
-                    File.WriteAllText("log.config", file.ReadToEnd());
+                    File.WriteAllText(_logFileName, file.ReadToEnd());
                 }
             }
 
-            _configuration = new XmlLoggingConfiguration("log.config");
+            _configuration = new XmlLoggingConfiguration(_logFileName);
 
-            foreach(var target in _configuration.AllTargets)
+            foreach (var target in _configuration.AllTargets)
             {
-                if(target is AsyncTargetWrapper)
+                if (target is AsyncTargetWrapper)
                 {
                     if (!(((AsyncTargetWrapper)target).WrappedTarget is FileTarget fileTarget))
                         continue;
@@ -108,7 +120,7 @@ namespace DeploymentToolkit.Logging
                         fileTarget.FileName
                             .ToString()
                             .Trim('\'')
-                            .Replace("DeploymentToolkit-", $"DeploymentToolkit-{loggerName}-")
+                            .Replace("DeploymentToolkit-", $"DeploymentToolkit-{LoggerName}-")
                     );
                 }
             }
