@@ -11,11 +11,11 @@ namespace DeploymentToolkit.Logging
     {
         public static string LoggerName { get; private set; }
 
-        private static string _logFileName
+        private static string _logFilePath
         {
             get
             {
-                return $"log.{LoggerName}.config";
+                return Path.Combine("Config", $"log.{LoggerName}.config");
             }
         }
 
@@ -95,19 +95,18 @@ namespace DeploymentToolkit.Logging
         {
             LoggerName = loggerName;
 
-            if (!File.Exists(_logFileName))
+            if (!File.Exists(_logFilePath))
             {
                 //Create logging rules if not existing
-
                 var assembly = Assembly.GetExecutingAssembly();
                 var resource = assembly.GetManifestResourceStream("DeploymentToolkit.Logging.log.config");
                 using (var file = new StreamReader(resource))
                 {
-                    File.WriteAllText(_logFileName, file.ReadToEnd());
+                    File.WriteAllText(_logFilePath, file.ReadToEnd());
                 }
             }
 
-            _configuration = new XmlLoggingConfiguration(_logFileName);
+            _configuration = new XmlLoggingConfiguration(_logFilePath);
 
             foreach (var target in _configuration.AllTargets)
             {
