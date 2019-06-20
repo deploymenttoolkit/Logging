@@ -1,4 +1,5 @@
-﻿using NLog.Config;
+﻿using DeploymentToolkit.ToolkitEnvironment;
+using NLog.Config;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
 using System;
@@ -15,7 +16,7 @@ namespace DeploymentToolkit.Logging
         {
             get
             {
-                return Path.Combine("Config", $"log.{LoggerName}.config");
+                return Path.Combine(EnvironmentVariables.DeploymentToolkitInstallPath, "Config", $"log.{LoggerName}.config");
             }
         }
 

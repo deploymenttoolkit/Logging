@@ -61,5 +61,11 @@
     </EmbeddedResource>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DeploymentToolkit.Deployment\DeploymentToolkit.Environment\DeploymentToolkit.ToolkitEnvironment.csproj">
+      <Project>{94c074c7-cae2-423e-84b7-80d5b74602bb}</Project>
+      <Name>DeploymentToolkit.ToolkitEnvironment</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
