@@ -16,7 +16,12 @@ namespace DeploymentToolkit.Logging
         {
             get
             {
-                return Path.Combine(EnvironmentVariables.DeploymentToolkitInstallPath, "Config", $"log.{LoggerName}.config");
+                var configDirectory = Path.Combine(EnvironmentVariables.DeploymentToolkitInstallPath, "Config");
+                if(!Directory.Exists(configDirectory))
+                {
+                    Directory.CreateDirectory(configDirectory);
+                }
+                return Path.Combine(configDirectory, $"log.{LoggerName}.config");
             }
         }
 
@@ -98,7 +103,7 @@ namespace DeploymentToolkit.Logging
 
             if (!File.Exists(_logFilePath))
             {
-                //Create logging rules if not existing
+                // Create logging rules if not existing
                 var assembly = Assembly.GetExecutingAssembly();
                 var resource = assembly.GetManifestResourceStream("DeploymentToolkit.Logging.log.config");
                 using (var file = new StreamReader(resource))
