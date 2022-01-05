@@ -30,8 +30,11 @@ namespace DeploymentToolkit.Logging
         {
             get
             {
-                if (string.IsNullOrEmpty(_logDirectory))
+                if(string.IsNullOrEmpty(_logDirectory))
+                {
                     _logDirectory = GetLogDirectory();
+                }
+
                 return _logDirectory;
             }
         }
@@ -41,38 +44,50 @@ namespace DeploymentToolkit.Logging
             try
             {
                 var currentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
-                if (!Directory.Exists(currentDirectory))
+                if(!Directory.Exists(currentDirectory))
+                {
                     Directory.CreateDirectory(currentDirectory);
+                }
 
-                if (IsDirectoryWriteable(currentDirectory))
+                if(IsDirectoryWriteable(currentDirectory))
+                {
                     return currentDirectory;
+                }
             }
-            catch (Exception) { }
+            catch(Exception) { }
 
             var programData = Environment.GetEnvironmentVariable("PROGRAMDATA", EnvironmentVariableTarget.Machine);
-            if (!string.IsNullOrEmpty(programData))
+            if(!string.IsNullOrEmpty(programData))
             {
                 try
                 {
                     var deploymentToolkitPath = Path.Combine(programData, "DeploymentToolkit");
-                    if (!Directory.Exists(deploymentToolkitPath))
+                    if(!Directory.Exists(deploymentToolkitPath))
+                    {
                         Directory.CreateDirectory(deploymentToolkitPath);
+                    }
 
                     var logPath = Path.Combine(deploymentToolkitPath, "Logs");
-                    if (!Directory.Exists(logPath))
+                    if(!Directory.Exists(logPath))
+                    {
                         Directory.CreateDirectory(logPath);
+                    }
 
-                    if (IsDirectoryWriteable(logPath))
+                    if(IsDirectoryWriteable(logPath))
+                    {
                         return logPath;
+                    }
                 }
-                catch (Exception) { }
+                catch(Exception) { }
             }
 
             var tempDirectory = Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.User);
-            if (!string.IsNullOrEmpty(tempDirectory))
+            if(!string.IsNullOrEmpty(tempDirectory))
             {
-                if (IsDirectoryWriteable(tempDirectory))
+                if(IsDirectoryWriteable(tempDirectory))
+                {
                     return tempDirectory;
+                }
             }
 
             throw new Exception("Failed to get a valid Log directory");
@@ -82,14 +97,14 @@ namespace DeploymentToolkit.Logging
         {
             try
             {
-                using (var fileStream = File.Create(Path.Combine(path, Path.GetRandomFileName()), 1, FileOptions.DeleteOnClose))
+                using(var fileStream = File.Create(Path.Combine(path, Path.GetRandomFileName()), 1, FileOptions.DeleteOnClose))
                 {
                     // Do nothing
                 }
 
                 return true;
             }
-            catch (UnauthorizedAccessException)
+            catch(UnauthorizedAccessException)
             {
                 return false;
             }
@@ -101,12 +116,12 @@ namespace DeploymentToolkit.Logging
         {
             LoggerName = loggerName;
 
-            if (!File.Exists(_logFilePath))
+            if(!File.Exists(_logFilePath))
             {
                 // Create logging rules if not existing
                 var assembly = Assembly.GetExecutingAssembly();
                 var resource = assembly.GetManifestResourceStream("DeploymentToolkit.Logging.log.config");
-                using (var file = new StreamReader(resource))
+                using(var file = new StreamReader(resource))
                 {
                     File.WriteAllText(_logFilePath, file.ReadToEnd());
                 }
@@ -114,12 +129,14 @@ namespace DeploymentToolkit.Logging
 
             _configuration = new XmlLoggingConfiguration(_logFilePath);
 
-            foreach (var target in _configuration.AllTargets)
+            foreach(var target in _configuration.AllTargets)
             {
-                if (target is AsyncTargetWrapper)
+                if(target is AsyncTargetWrapper)
                 {
-                    if (!(((AsyncTargetWrapper)target).WrappedTarget is FileTarget fileTarget))
+                    if(!(((AsyncTargetWrapper)target).WrappedTarget is FileTarget fileTarget))
+                    {
                         continue;
+                    }
 
                     fileTarget.FileName = Path.Combine(LogDirectory,
                         fileTarget.FileName
